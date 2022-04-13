@@ -1,5 +1,18 @@
+// -- Modules -- //
 import React from "react";
+import { Routes, Route } from "react-router";
 
-export const App = () => {
-  return <h1 className="text-3xl font-light">Hola mundo</h1>;
+// -- Components -- //
+import { Ordenes } from "./components/pages/Ordenes";
+
+const App = () => {
+  return (
+    <div>
+      <Routes>
+        <Route path="/" element={<Ordenes />} />
+      </Routes>
+    </div>
+  );
 };
+
+export default App;
