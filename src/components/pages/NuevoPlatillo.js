@@ -1,10 +1,17 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { FirebaseContext } from "../../firebase";
 import { useNavigate } from "react-router";
+import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
 
 export const NuevoPlatillo = () => {
+  // -- State para las imagenes -- //
+  const [subiendo, setSubiendo] = useState(false);
+  const [progreso, setProgreso] = useState(0);
+  const [urlImagen, setUrlImagen] = useState("");
+
   // -- Context de firebase -- //
   const { fb } = useContext(FirebaseContext);
 
@@ -37,14 +44,46 @@ export const NuevoPlatillo = () => {
     onSubmit: (platillo) => {
       try {
         platillo.existencia = true;
+        platillo.imagen = urlImagen;
         fb.db.collection("productos").add(platillo);
         // -- Redireccionar a la pagina de ordenes -- //
-        navigate("/ordenes");
+        navigate("/");
       } catch (error) {
         console.log(error);
       }
     },
   });
+
+  // -- Funciones para subir la imagen -- //
+  const handleSubmitImage = async (imagen) => {
+    const file = imagen;
+
+    if (!file) return;
+
+    const storageRef = ref(fb.storage, `products/${file.name + uuidv4()}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    await uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress = Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        );
+        setProgreso(progress);
+        setSubiendo(true);
+      },
+      (error) => {
+        alert(error);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          console.log(downloadURL);
+          setUrlImagen(downloadURL);
+          setSubiendo(false);
+        });
+      }
+    );
+  };
 
   return (
     <>
@@ -152,11 +191,28 @@ export const NuevoPlatillo = () => {
                 id="imagen"
                 type="file"
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                value={formik.values.imagen}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
+                placeholder="Imagen"
+                onChange={(e) => {
+                  handleSubmitImage(e.target.files[0]);
+                }}
               />
             </div>
+            {subiendo && (
+              <div className="h-12 w-full border my-5">
+                <div
+                  className="bg-green-500 absolute left-0 top-0 text-white px-2 text-sm h-12 flex items-center"
+                  style={{ width: `${progreso}%` }}
+                >
+                  {progreso} %
+                </div>
+              </div>
+            )}
+
+            {urlImagen && (
+              <div className="bg-green-500 text-white p-3 text-center my-5">
+                La imagen se subió correctamente
+              </div>
+            )}
 
             <div className="mb-4">
               <label
