@@ -47,7 +47,7 @@ export const NuevoPlatillo = () => {
         platillo.imagen = urlImagen;
         fb.db.collection("productos").add(platillo);
         // -- Redireccionar a la pagina de ordenes -- //
-        navigate("/");
+        navigate("/ordenes");
       } catch (error) {
         console.log(error);
       }

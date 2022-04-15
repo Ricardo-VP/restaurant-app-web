@@ -28,7 +28,7 @@ export const Sidebar = () => {
                 ? "text-yellow-500 p-1"
                 : "p-1 text-gray-400 block hover:bg-yellow-500 hover:text-gray-900"
             }
-            to="/"
+            to="/ordenes"
           >
             Ordenes
           </NavLink>

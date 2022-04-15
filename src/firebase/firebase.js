@@ -1,7 +1,7 @@
 import firebase from "firebase/compat/app";
 import firebaseConfig from "./config";
 import "firebase/compat/firestore";
-import { getStorage, ref } from "firebase/storage";
+import { getStorage } from "firebase/storage";
 
 class Firebase {
   constructor() {
